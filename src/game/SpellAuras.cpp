@@ -3447,6 +3447,8 @@ void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     Unit* target = GetTarget();
+    if(!target)
+        return;
 
     // Special case with temporary increase max/current health
     switch (GetId())
@@ -3471,12 +3473,10 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
                     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
                 }
             }
-            return;
         }
+        default:
+            target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
     }
-
-    // generic case
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply, bool /*Real*/)
@@ -3505,6 +3505,8 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool /*Real*/)
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool Real)
 {
     Unit* target = GetTarget();
+    if(!target)
+        return;
 
     // Special case with temporary increase max/current health percentage
     switch (GetId())
@@ -3528,12 +3530,10 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool Real)
                         target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(m_modifier.m_amount), apply);
                 }
             }
-            return;
         }
+        default:
+            target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(m_modifier.m_amount), apply);
     }
-
-    // generic case
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(m_modifier.m_amount), apply);
 }
 
 /********************************/
