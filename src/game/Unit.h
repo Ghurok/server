@@ -1,6 +1,6 @@
-/*
+/**
  * Copyright (C) 2005-2013 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2013 MaNGOSZero <https:// github.com/mangos/zero>
+ * Copyright (C) 2009-2013 MaNGOSZero <https://github.com/mangoszero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1810,7 +1810,7 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
             func(pet);
 
     if (controlledMask & CONTROLLED_MINIPET)
-        if (Unit* mini = GetMiniPet())
+        if (Pet* mini = GetMiniPet())
             func(mini);
 
     if (controlledMask & CONTROLLED_GUARDIANS)
@@ -1842,7 +1842,7 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
                 return true;
 
     if (controlledMask & CONTROLLED_MINIPET)
-        if (Unit* mini = GetMiniPet())
+        if (Pet* mini = GetMiniPet())
             if (func(mini))
                 return true;
 

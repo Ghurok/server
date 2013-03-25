@@ -1,5 +1,5 @@
 # Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
-# Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+# Copyright (C) 2009-2013 MaNGOSZero <https://github.com/mangoszero>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,11 +58,11 @@ endif()
 message(
   "\nThis script builds the MaNGOS server.
   Options that can be used in order to configure the process:
-    PREFIX: Path where the server should be installed to
+    CMAKE_INSTALL_PREFIX: Path where the server should be installed to
     PCH: Use precompiled headers
     DEBUG: Debug mode
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
-  For example: cmake .. -DDEBUG=1 -DPREFIX=/opt/mangos\n"
+  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos\n"
 ) # TODO: PLATFORM: Sets the architecture for compile (X86,X64)
 
 # Override configuration-types - we don't use anything else than debug and release
@@ -101,7 +101,21 @@ option(DEBUG "Debug mode" 0)
 # option(RA "With Remote Access" 0) # TODO: support remote access
 option(TBB_USE_EXTERNAL "Use external TBB" 0)
 option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
+option(USE_TBB_MALLOC "Use included TBB malloc" 0)
 option(ACE_USE_EXTERNAL "Use external ACE" 0)
+
+if(WIN32)
+  if(PLATFORM MATCHES X86) # 32-bit
+    option(USE_FASTMM_MALLOC "Use included FastMM malloc (default for win*)" 1)
+    option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
+  else() # 64-bit
+    option(USE_STD_MALLOC "Use standard malloc instead of TBB" 0)
+    option(USE_FASTMM_MALLOC "Use included FastMM malloc (default for win*)" 1)
+  endif()
+else()
+#Unix and other platforms
+  option(USE_STD_MALLOC "Use standard malloc instead of TBB" 1)
+endif()
 
 find_package(PCHSupport)
 
@@ -118,19 +132,9 @@ endif()
 # option(SQL "Copy SQL files" 0)
 # option(TOOLS "Build tools" 0)
 
-# Set up the install-prefix
-if(CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
-  get_filename_component(PREFIX_ABSOLUTE "../mangos-server" ABSOLUTE)
-  set(CMAKE_INSTALL_PREFIX ${PREFIX_ABSOLUTE} CACHE PATH "Install path prefix." FORCE)
-endif()
+# TODO: remove this in the future! it has only been added to make the switch easier for end users
 if(PREFIX)
-  if(!WIN32)
-    string(REGEX REPLACE "^~" "$ENV{HOME}" PREFIX ${PREFIX})
-  endif()
-  get_filename_component(PREFIX_ABSOLUTE ${PREFIX} ABSOLUTE)
-  set(CMAKE_INSTALL_PREFIX ${PREFIX_ABSOLUTE} CACHE PATH "Install path prefix." FORCE)
-else()
-  set(PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "Install path prefix.")
+  message(FATAL_ERROR "The parameter PREFIX has been removed. Please re-run CMake and use CMAKE_INSTALL_PREFIX instead to define your installation location!")
 endif()
 
 set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
@@ -169,7 +173,7 @@ else()
   include(cmake/ImportACE.cmake)
 endif()
 
-if(NOT USE_STD_MALLOC)
+if(USE_TBB_MALLOC)
   unset(TBB_INCLUDE_DIR CACHE)
   unset(TBB_LIBRARIES CACHE)
   unset(TBB_LIBRARIES_DIR CACHE)
